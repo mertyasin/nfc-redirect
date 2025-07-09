@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>InstaTouch</title>
+  <script>
+    // URL'den kullanıcı adını al: instatouchband.com/?user=ahmet
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('user') || 'instagram'; // Fallback
+    
+    // Instagram'a yönlendir (0.1 saniye gecikmeli)
+    setTimeout(() => {
+      window.location.href = https://instagram.com/${username};
+    }, 100);
+  </script>
+  <style>
+    body { 
+      background: linear-gradient(135deg, #405DE6, #833AB4); 
+      color: white; 
+      text-align: center; 
+      padding-top: 100px;
+      font-family: Arial;
+    }
+  </style>
+</head>
+<body>
+  <h1>InstaTouch</h1>
+  <p>Instagram profilinize yönlendiriliyorsunuz...</p>
+</body>
+</html>
