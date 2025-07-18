@@ -1,18 +1,31 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
+  <meta charset="utf-8">
   <title>InstaTouch</title>
-  <meta http-equiv="refresh" content="0; url='https://instagram.com/__USERNAME__'" />
+
   <script>
-    // URL'den kullanıcıcı adını al ve yönlendir
-    const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('user') || 'instagram';
-    
-    // Çift yönlendirme garantisi (hem meta hem JS)
-    window.location.href = https://instagram.com/${username};
+    // URL parametresini al
+    const params = new URLSearchParams(window.location.search);
+    const user = params.get('user') || 'instagram';
+
+    // Parametre temizleme (isteğe bağlı, güvenlik için)
+    const safeUser = user.match(/^[a-zA-Z0-9._]+$/)
+      ? user
+      : 'instagram';
+
+    // Instagram profiline yönlendir
+    window.location.replace(
+      `https://instagram.com/${encodeURIComponent(safeUser)}`
+    );
   </script>
+
+  <noscript>
+    <meta http-equiv="refresh"
+      content="0; URL=https://instagram.com/instagram" />
+  </noscript>
 </head>
 <body>
-  <p>Instagram'a yönlendiriliyorsunuz...</p>
+  <p>Instagram sayfasına yönlendiriliyorsun…</p>
 </body>
 </html>
