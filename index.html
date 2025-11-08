@@ -1,31 +1,598 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="utf-8">
-  <title>InstaTouch</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zikirmatik</title>
+  <style>
+    :root {
+      --bg-color: #f4f0e8;
+      --bg-accent: #e2d9cc;
+      --bg-accent-dark: #cabca9;
+      --text-color: #2d2720;
+      --device-bg: #fefbf7;
+      --device-shadow: rgba(0, 0, 0, 0.08);
+      --button-main: linear-gradient(145deg, #f8a07e, #f16e64);
+      --button-main-shadow: rgba(170, 74, 62, 0.35);
+      --button-secondary: #fff8f0;
+      --button-secondary-text: #725c4b;
+      --highlight: #f1c376;
+      --menu-bg: rgba(0, 0, 0, 0.45);
+      --panel-bg: rgba(254, 251, 247, 0.98);
+      --border-color: rgba(114, 92, 75, 0.2);
+    }
+
+    body.theme-dark {
+      --bg-color: #10151c;
+      --bg-accent: #1d2430;
+      --bg-accent-dark: #131923;
+      --text-color: #f0f6ff;
+      --device-bg: #1a202c;
+      --device-shadow: rgba(9, 12, 20, 0.65);
+      --button-main: linear-gradient(145deg, #4f62ff, #2732b3);
+      --button-main-shadow: rgba(39, 50, 179, 0.55);
+      --button-secondary: #273044;
+      --button-secondary-text: #f0f6ff;
+      --highlight: #8be0ff;
+      --menu-bg: rgba(0, 0, 0, 0.6);
+      --panel-bg: rgba(31, 42, 58, 0.98);
+      --border-color: rgba(196, 218, 255, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Nunito", "Segoe UI", sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, var(--bg-accent), var(--bg-color));
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 16px 70px;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    header {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .icon-button {
+      background: transparent;
+      border: none;
+      color: var(--text-color);
+      font-size: 1.6rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .icon-button:hover,
+    .icon-button:focus-visible {
+      outline: none;
+      background: var(--bg-accent);
+    }
+
+    .menu-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--menu-bg);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: stretch;
+      justify-content: flex-start;
+      z-index: 10;
+    }
+
+    .menu-overlay.open {
+      display: flex;
+    }
+
+    .menu-panel {
+      width: min(320px, 85vw);
+      background: var(--panel-bg);
+      padding: 24px;
+      border-radius: 0 20px 20px 0;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+    }
+
+    .menu-panel h2 {
+      margin-top: 0;
+    }
+
+    .menu-section {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+    }
+
+    .menu-section:last-child {
+      border-bottom: none;
+    }
+
+    .menu-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+    }
+
+    .menu-option select,
+    .menu-option button {
+      background: var(--button-secondary);
+      color: var(--button-secondary-text);
+      border: none;
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    main {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      flex-grow: 1;
+    }
+
+    .device-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      aspect-ratio: 3 / 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .device-body {
+      width: 100%;
+      height: 100%;
+      background: var(--device-bg);
+      border-radius: 55% 55% 40% 40% / 48% 48% 52% 52%;
+      box-shadow: 0 20px 40px var(--device-shadow);
+      position: relative;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .device-body::after {
+      content: "";
+      position: absolute;
+      inset: 12px 24px;
+      border-radius: 50% 50% 38% 38% / 50% 50% 48% 48%;
+      border: 1px solid var(--border-color);
+      pointer-events: none;
+    }
+
+    .counter-display {
+      margin-top: 8px;
+      background: var(--bg-accent);
+      color: var(--text-color);
+      font-family: "Orbitron", "Courier New", monospace;
+      font-size: 2rem;
+      letter-spacing: 0.28em;
+      padding: 12px 18px;
+      border-radius: 16px;
+      box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.08);
+      min-width: 180px;
+      text-align: center;
+    }
+
+    .count-button {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: var(--button-main);
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 18px 30px var(--button-main-shadow);
+      cursor: pointer;
+      transition: transform 0.1s ease;
+    }
+
+    .count-button:active {
+      transform: scale(0.97);
+    }
+
+    .count-button::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .device-controls {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .device-controls .icon-button {
+      justify-self: center;
+      width: 54px;
+      height: 54px;
+      font-size: 1.1rem;
+      border-radius: 16px;
+      background: var(--button-secondary);
+      color: var(--button-secondary-text);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .device-controls .icon-button.active {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+      border: 2px solid var(--highlight);
+    }
+
+    .reset-button {
+      position: absolute;
+      top: 22px;
+      right: 28px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--button-secondary);
+      color: var(--button-secondary-text);
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .save-button {
+      background: var(--button-secondary);
+      color: var(--button-secondary-text);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .save-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--button-secondary);
+      color: var(--button-secondary-text);
+      padding: 12px 20px;
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 15;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -12px);
+    }
+
+    .ad-banner {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.08);
+      color: rgba(0, 0, 0, 0.65);
+      text-align: center;
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      backdrop-filter: blur(4px);
+    }
+
+    body.theme-dark .ad-banner {
+      background: rgba(10, 13, 21, 0.65);
+      color: rgba(240, 246, 255, 0.72);
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 16px 12px 70px;
+      }
+
+      .count-button {
+        width: 120px;
+        height: 120px;
+      }
+
+      .counter-display {
+        min-width: 160px;
+        font-size: 1.7rem;
+      }
+    }
+  </style>
+</head>
+<body class="theme-light">
+  <div class="menu-overlay" id="menuOverlay" aria-hidden="true">
+    <div class="menu-panel" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
+      <h2 id="menuTitle">Menü</h2>
+      <div class="menu-section">
+        <h3>Üyelik &amp; Reklamsız Deneyim</h3>
+        <p>Pro paketle reklamları kaldırın ve sınırsız kayıt tutun.</p>
+        <button id="goPro">Pro'ya Geç</button>
+      </div>
+      <div class="menu-section">
+        <h3>Ses Ayarları</h3>
+        <div class="menu-option">
+          <span>Sayaç sesi</span>
+          <select id="soundStyle">
+            <option value="tick">Tik (klasik)</option>
+            <option value="bell">Yumuşak çan</option>
+            <option value="wood">Ahşap tespih</option>
+          </select>
+        </div>
+      </div>
+      <div class="menu-section">
+        <h3>Kayıtlı Zikirler</h3>
+        <ul id="historyList"></ul>
+      </div>
+      <div class="menu-section">
+        <h3>Dil</h3>
+        <div class="menu-option">
+          <span>Dil seç</span>
+          <select id="languageSelect">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+      </div>
+      <button class="icon-button" id="closeMenu" aria-label="Menüyü kapat">✕</button>
+    </div>
+  </div>
+
+  <header>
+    <button class="icon-button" id="openMenu" aria-label="Menüyü aç">☰</button>
+    <div class="title">ZİKİRMATİK</div>
+    <button class="save-button" id="saveButton">Kaydet</button>
+  </header>
+
+  <main>
+    <div class="device-wrapper" aria-live="polite">
+      <div class="device-body">
+        <div class="counter-display" id="counterDisplay">00000</div>
+        <button class="reset-button" id="resetButton" aria-label="Sıfırla">0</button>
+        <button class="count-button" id="countButton">Zikir</button>
+        <div class="device-controls">
+          <button class="icon-button active" id="soundToggle" aria-pressed="true" aria-label="Ses açık">🔊</button>
+          <button class="icon-button active" id="vibrateToggle" aria-pressed="true" aria-label="Titreşim açık">🔔</button>
+          <button class="icon-button" id="themeToggle" aria-label="Tema değiştir">🌙</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="assertive"></div>
+
+  <div class="ad-banner">Reklam Alanı – Premium sürüm ile reklamsız deneyim yaşayın.</div>
 
   <script>
-    // URL parametresini al
-    const params = new URLSearchParams(window.location.search);
-    const user = params.get('user') || 'instagram';
+    const state = {
+      count: 0,
+      soundEnabled: true,
+      vibrateEnabled: true,
+      theme: 'light',
+      savedItems: JSON.parse(localStorage.getItem('zikirmatikHistory') || '[]'),
+      soundStyle: localStorage.getItem('zikirmatikSoundStyle') || 'tick',
+      language: localStorage.getItem('zikirmatikLanguage') || 'tr'
+    };
 
-    // Parametre temizleme (isteğe bağlı, güvenlik için)
-    const safeUser = user.match(/^[a-zA-Z0-9._]+$/)
-      ? user
-      : 'instagram';
+    const counterDisplay = document.getElementById('counterDisplay');
+    const countButton = document.getElementById('countButton');
+    const resetButton = document.getElementById('resetButton');
+    const soundToggle = document.getElementById('soundToggle');
+    const vibrateToggle = document.getElementById('vibrateToggle');
+    const themeToggle = document.getElementById('themeToggle');
+    const toast = document.getElementById('toast');
+    const saveButton = document.getElementById('saveButton');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const openMenu = document.getElementById('openMenu');
+    const closeMenu = document.getElementById('closeMenu');
+    const historyList = document.getElementById('historyList');
+    const soundStyleSelect = document.getElementById('soundStyle');
+    const languageSelect = document.getElementById('languageSelect');
 
-    // Instagram profiline yönlendir
-    window.location.replace(
-      `https://instagram.com/${encodeURIComponent(safeUser)}`
-    );
+    let audioContext;
+
+    function updateCounterDisplay() {
+      counterDisplay.textContent = state.count.toString().padStart(5, '0');
+    }
+
+    function playTick() {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        const now = audioContext.currentTime;
+        let frequency = 1200;
+        if (state.soundStyle === 'bell') {
+          frequency = 880;
+        } else if (state.soundStyle === 'wood') {
+          frequency = 520;
+        }
+        osc.frequency.setValueAtTime(frequency, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.3, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } catch (error) {
+        console.warn('Ses çalınamadı', error);
+      }
+    }
+
+    function vibrate() {
+      if (!state.vibrateEnabled) return;
+      if (navigator.vibrate) {
+        navigator.vibrate(15);
+      }
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(showToast.timeoutId);
+      showToast.timeoutId = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2200);
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'light' ? 'dark' : 'light';
+      document.body.classList.toggle('theme-dark', state.theme === 'dark');
+      themeToggle.textContent = state.theme === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('zikirmatikTheme', state.theme);
+    }
+
+    function updateHistoryUI() {
+      historyList.innerHTML = '';
+      if (!state.savedItems.length) {
+        const empty = document.createElement('li');
+        empty.textContent = 'Henüz kayıt yok.';
+        historyList.appendChild(empty);
+        return;
+      }
+      state.savedItems.slice().reverse().forEach((item) => {
+        const li = document.createElement('li');
+        const date = new Date(item.date).toLocaleString(state.language);
+        li.textContent = `${item.count.toString().padStart(5, '0')} — ${date}`;
+        historyList.appendChild(li);
+      });
+    }
+
+    function saveCurrentCount() {
+      if (!state.count) {
+        showToast('Önce birkaç zikir sayın.');
+        return;
+      }
+      const entry = { count: state.count, date: new Date().toISOString() };
+      state.savedItems.push(entry);
+      localStorage.setItem('zikirmatikHistory', JSON.stringify(state.savedItems));
+      updateHistoryUI();
+      showToast('Zikir kaydedildi.');
+    }
+
+    countButton.addEventListener('click', () => {
+      state.count = (state.count + 1) % 100000;
+      updateCounterDisplay();
+      playTick();
+      vibrate();
+    });
+
+    resetButton.addEventListener('click', () => {
+      state.count = 0;
+      updateCounterDisplay();
+      showToast('Sayaç sıfırlandı.');
+    });
+
+    soundToggle.addEventListener('click', () => {
+      state.soundEnabled = !state.soundEnabled;
+      soundToggle.classList.toggle('active', state.soundEnabled);
+      soundToggle.textContent = state.soundEnabled ? '🔊' : '🔈';
+      soundToggle.setAttribute('aria-pressed', String(state.soundEnabled));
+    });
+
+    vibrateToggle.addEventListener('click', () => {
+      state.vibrateEnabled = !state.vibrateEnabled;
+      vibrateToggle.classList.toggle('active', state.vibrateEnabled);
+      vibrateToggle.textContent = state.vibrateEnabled ? '🔔' : '🔕';
+      vibrateToggle.setAttribute('aria-pressed', String(state.vibrateEnabled));
+    });
+
+    themeToggle.addEventListener('click', toggleTheme);
+
+    saveButton.addEventListener('click', saveCurrentCount);
+
+    openMenu.addEventListener('click', () => {
+      menuOverlay.classList.add('open');
+      menuOverlay.setAttribute('aria-hidden', 'false');
+    });
+
+    closeMenu.addEventListener('click', () => {
+      menuOverlay.classList.remove('open');
+      menuOverlay.setAttribute('aria-hidden', 'true');
+    });
+
+    menuOverlay.addEventListener('click', (event) => {
+      if (event.target === menuOverlay) {
+        menuOverlay.classList.remove('open');
+        menuOverlay.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    soundStyleSelect.value = state.soundStyle;
+    soundStyleSelect.addEventListener('change', () => {
+      state.soundStyle = soundStyleSelect.value;
+      localStorage.setItem('zikirmatikSoundStyle', state.soundStyle);
+    });
+
+    languageSelect.value = state.language;
+    languageSelect.addEventListener('change', () => {
+      state.language = languageSelect.value;
+      localStorage.setItem('zikirmatikLanguage', state.language);
+      updateHistoryUI();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const storedTheme = localStorage.getItem('zikirmatikTheme');
+      if (storedTheme === 'dark') {
+        state.theme = 'dark';
+        document.body.classList.add('theme-dark');
+        themeToggle.textContent = '☀️';
+      }
+      updateCounterDisplay();
+      updateHistoryUI();
+    });
   </script>
-
-  <noscript>
-    <meta http-equiv="refresh"
-      content="0; URL=https://instagram.com/instagram" />
-  </noscript>
-</head>
-<body>
-  <p>Instagram sayfasına yönlendiriliyorsun…</p>
 </body>
 </html>
